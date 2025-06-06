@@ -1,0 +1,28 @@
+{
+  "name": "glowing-memory",
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build:prod": "vite build",
+    "preview": "vite preview",
+    "test": "vitest run",
+    "test:e2e": "playwright test",
+    "analyze": "vite build --mode analyze"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.43.1",
+    "@sentry/vite-plugin": "^2.12.1",
+    "@vitejs/plugin-legacy": "^5.2.0",
+    "jsdom": "^26.1.0",
+    "rollup-plugin-visualizer": "^5.12.1",
+    "vite": "^5.2.0",
+    "vitest": "^1.2.2"
+  },
+  "dependencies": {
+    "@sentry/browser": "^7.110.0",
+    "ammo.js": "0.0.10",
+    "three": "^0.160.0",
+    "web-vitals": "^3.4.1"
+  }
+}

@@ -1,4 +1,5 @@
-import { Engine } from './engine.js';
+import { Engine } from './engine.js'
+import { initMonitoring } from './monitoring.js'
 
 async function init() {
   const engine = new Engine();
@@ -23,6 +24,7 @@ async function init() {
   }
 
   engine.start();
+  initMonitoring();
 }
 
 init();

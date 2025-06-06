@@ -1,0 +1,47 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: npm ci
+      - run: npm test
+      - run: npx playwright install --with-deps
+      - run: npm run test:e2e
+      - run: npm run build:prod
+      - run: npm run analyze
+      - uses: actions/upload-artifact@v4
+        with:
+          name: dist
+          path: dist
+      - name: Upload bundle stats
+        uses: actions/upload-artifact@v4
+        with:
+          name: stats
+          path: dist/stats.html
+      - name: Sentry Release
+        if: ${{ env.SENTRY_AUTH_TOKEN != '' }}
+        uses: getsentry/action-release@v1
+        with:
+          environment: production
+          sentry_auth_token: ${{ secrets.SENTRY_AUTH_TOKEN }}
+          sentry_org: ${{ secrets.SENTRY_ORG }}
+          sentry_project: ${{ secrets.SENTRY_PROJECT }}
+          version: ${{ github.sha }}
+          finalizing: true
+      - name: Deploy to CDN
+        env:
+          CDN_KEY: ${{ secrets.CDN_KEY }}
+        run: |
+          echo "Deploying to CDN..."
+          # rsync or aws s3 cp dist/ ...
+          echo "done"

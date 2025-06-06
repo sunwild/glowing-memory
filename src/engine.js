@@ -1,5 +1,8 @@
+import * as THREE from 'three'
+import Ammo from 'ammo.js'
+
 export class Engine {
-  constructor({ gravity = { x: 0, y: -9.8, z: 0 } } = {}) {
+  constructor({ gravity = { x: 0, y: -9.8, z: 0 }, enableRenderer = true } = {}) {
     this.gravity = gravity;
     this.objects = [];
     this.physicsWorld = null;
@@ -13,9 +16,13 @@ export class Engine {
     );
     this.camera.position.set(0, 5, 10);
 
-    this.renderer = new THREE.WebGLRenderer({ antialias: true });
-    this.renderer.setSize(window.innerWidth, window.innerHeight);
-    document.body.appendChild(this.renderer.domElement);
+    if (enableRenderer) {
+      this.renderer = new THREE.WebGLRenderer({ antialias: true })
+      this.renderer.setSize(window.innerWidth, window.innerHeight)
+      document.body.appendChild(this.renderer.domElement)
+    } else {
+      this.renderer = { render: () => {} }
+    }
 
     const light = new THREE.DirectionalLight(0xffffff, 1);
     light.position.set(5, 10, 7.5);
