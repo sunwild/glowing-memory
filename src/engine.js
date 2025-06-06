@@ -1,5 +1,7 @@
+import { RendererManager, MaterialLib } from './rendererManager.js';
+
 export class Engine {
-  constructor({ gravity = { x: 0, y: -9.8, z: 0 } } = {}) {
+  constructor({ gravity = { x: 0, y: -9.8, z: 0 }, canvas = null } = {}) {
     this.gravity = gravity;
     this.objects = [];
     this.physicsWorld = null;
@@ -13,9 +15,11 @@ export class Engine {
     );
     this.camera.position.set(0, 5, 10);
 
-    this.renderer = new THREE.WebGLRenderer({ antialias: true });
-    this.renderer.setSize(window.innerWidth, window.innerHeight);
-    document.body.appendChild(this.renderer.domElement);
+    this.canvas = canvas || document.createElement('canvas');
+    document.body.appendChild(this.canvas);
+    RendererManager.scene = this.scene;
+    RendererManager.camera = this.camera;
+    this.renderer = RendererManager.init(this.canvas);
 
     const light = new THREE.DirectionalLight(0xffffff, 1);
     light.position.set(5, 10, 7.5);
@@ -24,7 +28,6 @@ export class Engine {
     window.addEventListener("resize", () => {
       this.camera.aspect = window.innerWidth / window.innerHeight;
       this.camera.updateProjectionMatrix();
-      this.renderer.setSize(window.innerWidth, window.innerHeight);
     });
   }
 
@@ -49,7 +52,7 @@ export class Engine {
   }
 
   addBox({ width = 1, height = 1, depth = 1, x = 0, y = 0, z = 0, mass = 1 }) {
-    const material = new THREE.MeshStandardMaterial({ color: 0x6699ff });
+    const material = MaterialLib.get('box');
     const geometry = new THREE.BoxGeometry(width, height, depth);
     const mesh = new THREE.Mesh(geometry, material);
     mesh.position.set(x, y, z);
@@ -78,7 +81,7 @@ export class Engine {
   }
 
   addSphere({ radius = 1, x = 0, y = 0, z = 0, mass = 1 }) {
-    const material = new THREE.MeshStandardMaterial({ color: 0xff9966 });
+    const material = MaterialLib.get('sphere');
     const geometry = new THREE.SphereGeometry(radius, 32, 32);
     const mesh = new THREE.Mesh(geometry, material);
     mesh.position.set(x, y, z);
@@ -125,7 +128,7 @@ export class Engine {
       requestAnimationFrame(animate);
       const delta = this._clock.getDelta();
       this.stepSimulation(delta);
-      this.renderer.render(this.scene, this.camera);
+      RendererManager.drawFrame(delta);
     };
     animate();
   }
