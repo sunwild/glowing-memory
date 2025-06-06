@@ -1,8 +1,10 @@
+import { PhysicsWorld } from './physics.js';
+
 export class Engine {
   constructor({ gravity = { x: 0, y: -9.8, z: 0 } } = {}) {
     this.gravity = gravity;
+    this.physics = new PhysicsWorld({ gravity });
     this.objects = [];
-    this.physicsWorld = null;
 
     this.scene = new THREE.Scene();
     this.camera = new THREE.PerspectiveCamera(
@@ -29,22 +31,7 @@ export class Engine {
   }
 
   async initPhysics() {
-    const AmmoLib = await Ammo();
-    const collisionConfiguration = new AmmoLib.btDefaultCollisionConfiguration();
-    const dispatcher = new AmmoLib.btCollisionDispatcher(collisionConfiguration);
-    const broadphase = new AmmoLib.btDbvtBroadphase();
-    const solver = new AmmoLib.btSequentialImpulseConstraintSolver();
-    this.physicsWorld = new AmmoLib.btDiscreteDynamicsWorld(
-      dispatcher,
-      broadphase,
-      solver,
-      collisionConfiguration
-    );
-    this.physicsWorld.setGravity(
-      new AmmoLib.btVector3(this.gravity.x, this.gravity.y, this.gravity.z)
-    );
-    this.Ammo = AmmoLib;
-
+    await this.physics.init();
     this._clock = new THREE.Clock();
   }
 
@@ -55,25 +42,11 @@ export class Engine {
     mesh.position.set(x, y, z);
     this.scene.add(mesh);
 
-    const transform = new this.Ammo.btTransform();
-    transform.setIdentity();
-    transform.setOrigin(new this.Ammo.btVector3(x, y, z));
-    const motionState = new this.Ammo.btDefaultMotionState(transform);
-    const localInertia = new this.Ammo.btVector3(0, 0, 0);
-    const shape = new this.Ammo.btBoxShape(
-      new this.Ammo.btVector3(width / 2, height / 2, depth / 2)
-    );
-    shape.calculateLocalInertia(mass, localInertia);
-
-    const rbInfo = new this.Ammo.btRigidBodyConstructionInfo(
+    const body = this.physics.addBody(mesh, {
+      shape: 'box',
+      size: [width, height, depth],
       mass,
-      motionState,
-      shape,
-      localInertia
-    );
-    const body = new this.Ammo.btRigidBody(rbInfo);
-    this.physicsWorld.addRigidBody(body);
-
+    });
     this.objects.push({ mesh, body });
   }
 
@@ -84,43 +57,20 @@ export class Engine {
     mesh.position.set(x, y, z);
     this.scene.add(mesh);
 
-    const transform = new this.Ammo.btTransform();
-    transform.setIdentity();
-    transform.setOrigin(new this.Ammo.btVector3(x, y, z));
-    const motionState = new this.Ammo.btDefaultMotionState(transform);
-    const localInertia = new this.Ammo.btVector3(0, 0, 0);
-    const shape = new this.Ammo.btSphereShape(radius);
-    shape.calculateLocalInertia(mass, localInertia);
-
-    const rbInfo = new this.Ammo.btRigidBodyConstructionInfo(
+    const body = this.physics.addBody(mesh, {
+      shape: 'sphere',
+      radius,
       mass,
-      motionState,
-      shape,
-      localInertia
-    );
-    const body = new this.Ammo.btRigidBody(rbInfo);
-    this.physicsWorld.addRigidBody(body);
-
+    });
     this.objects.push({ mesh, body });
   }
 
   stepSimulation(delta) {
-    this.physicsWorld.stepSimulation(delta, 10);
-
-    for (const obj of this.objects) {
-      const ms = obj.body.getMotionState();
-      if (ms) {
-        ms.getWorldTransform(this._transformAux1);
-        const p = this._transformAux1.getOrigin();
-        const q = this._transformAux1.getRotation();
-        obj.mesh.position.set(p.x(), p.y(), p.z());
-        obj.mesh.quaternion.set(q.x(), q.y(), q.z(), q.w());
-      }
-    }
+    this.physics.step(delta);
   }
 
   async start() {
-    this._transformAux1 = new this.Ammo.btTransform();
+    this._transformAux1 = new this.physics.Ammo.btTransform();
     const animate = () => {
       requestAnimationFrame(animate);
       const delta = this._clock.getDelta();
