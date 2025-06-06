@@ -1,7 +1,8 @@
 import { Engine } from './engine.js';
 
 async function init() {
-  const engine = new Engine();
+  const canvas = document.getElementById('app');
+  const engine = new Engine({ canvas });
   await engine.initPhysics();
 
   // ground plane
