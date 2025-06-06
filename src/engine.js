@@ -21,11 +21,17 @@ export class Engine {
     light.position.set(5, 10, 7.5);
     this.scene.add(light);
 
+    this.updateCallbacks = [];
+
     window.addEventListener("resize", () => {
       this.camera.aspect = window.innerWidth / window.innerHeight;
       this.camera.updateProjectionMatrix();
       this.renderer.setSize(window.innerWidth, window.innerHeight);
     });
+  }
+
+  addUpdateCallback(fn) {
+    this.updateCallbacks.push(fn);
   }
 
   async initPhysics() {
@@ -125,6 +131,9 @@ export class Engine {
       requestAnimationFrame(animate);
       const delta = this._clock.getDelta();
       this.stepSimulation(delta);
+      for (const cb of this.updateCallbacks) {
+        cb(delta);
+      }
       this.renderer.render(this.scene, this.camera);
     };
     animate();
