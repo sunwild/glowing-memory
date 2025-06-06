@@ -1,4 +1,6 @@
 import { Engine } from './engine.js';
+import { Editor } from './editor.js';
+import { Profiler } from './profiler.js';
 
 async function init() {
   const engine = new Engine();
@@ -23,6 +25,13 @@ async function init() {
   }
 
   engine.start();
+
+  const editor = new Editor(engine);
+  engine.editor = editor;
+  await editor.open();
+
+  const profiler = new Profiler(engine.renderer);
+  profiler.capture(1000).then((r) => console.log('Profile:', r));
 }
 
 init();

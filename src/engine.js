@@ -125,6 +125,9 @@ export class Engine {
       requestAnimationFrame(animate);
       const delta = this._clock.getDelta();
       this.stepSimulation(delta);
+      if (this.editor && this.editor.update) {
+        this.editor.update();
+      }
       this.renderer.render(this.scene, this.camera);
     };
     animate();
