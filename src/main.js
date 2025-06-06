@@ -1,8 +1,10 @@
 import { Engine } from './engine.js';
+import { UIManager } from './ui/uiManager.js';
 
 async function init() {
   const engine = new Engine();
   await engine.initPhysics();
+  const ui = new UIManager(engine.scene);
 
   // ground plane
   engine.addBox({ width: 20, height: 1, depth: 20, y: -0.5, mass: 0 });
@@ -21,6 +23,12 @@ async function init() {
       z: 0,
     });
   }
+
+  ui.show('inventory', { items: ['Sword', 'Shield'] });
+  ui.show('minimap');
+  ui.show('dialog', { message: 'Welcome to the demo!' });
+
+  ui.widgets.dialog.el.addEventListener('close', () => ui.widgets.dialog.hide());
 
   engine.start();
 }

@@ -5,6 +5,8 @@ This repository contains a minimal browser based 3D engine example using
 [Ammo.js](https://github.com/kripken/ammo.js/) for physics. The example spawns
 several boxes that fall onto a static ground plane. It now also supports
 dynamic spheres that interact with the physics world in the same way.
+It now also contains a simple HUD framework with DOM, Canvas2D and WebGL
+sprites. Widgets for an inventory, mini-map and dialog are included.
 
 ## Running
 
