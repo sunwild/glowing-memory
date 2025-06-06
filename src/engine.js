@@ -77,6 +77,33 @@ export class Engine {
     this.objects.push({ mesh, body });
   }
 
+  addSphere({ radius = 1, x = 0, y = 0, z = 0, mass = 1 }) {
+    const material = new THREE.MeshStandardMaterial({ color: 0xff9966 });
+    const geometry = new THREE.SphereGeometry(radius, 32, 32);
+    const mesh = new THREE.Mesh(geometry, material);
+    mesh.position.set(x, y, z);
+    this.scene.add(mesh);
+
+    const transform = new this.Ammo.btTransform();
+    transform.setIdentity();
+    transform.setOrigin(new this.Ammo.btVector3(x, y, z));
+    const motionState = new this.Ammo.btDefaultMotionState(transform);
+    const localInertia = new this.Ammo.btVector3(0, 0, 0);
+    const shape = new this.Ammo.btSphereShape(radius);
+    shape.calculateLocalInertia(mass, localInertia);
+
+    const rbInfo = new this.Ammo.btRigidBodyConstructionInfo(
+      mass,
+      motionState,
+      shape,
+      localInertia
+    );
+    const body = new this.Ammo.btRigidBody(rbInfo);
+    this.physicsWorld.addRigidBody(body);
+
+    this.objects.push({ mesh, body });
+  }
+
   stepSimulation(delta) {
     this.physicsWorld.stepSimulation(delta, 10);
 

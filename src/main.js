@@ -12,6 +12,16 @@ async function init() {
     engine.addBox({ x: Math.random() * 4 - 2, y: 2 + i * 2, z: 0 });
   }
 
+  // falling spheres
+  for (let i = 0; i < 3; i++) {
+    engine.addSphere({
+      radius: 0.5,
+      x: Math.random() * 4 - 2,
+      y: 6 + i * 2,
+      z: 0,
+    });
+  }
+
   engine.start();
 }
 
