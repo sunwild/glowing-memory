@@ -3,6 +3,7 @@ export class Engine {
     this.gravity = gravity;
     this.objects = [];
     this.physicsWorld = null;
+    this.gameObjects = [];
 
     this.scene = new THREE.Scene();
     this.camera = new THREE.PerspectiveCamera(
@@ -104,6 +105,20 @@ export class Engine {
     this.objects.push({ mesh, body });
   }
 
+  addGameObject(obj) {
+    this.gameObjects.push(obj);
+  }
+
+  removeGameObject(obj) {
+    const idx = this.gameObjects.indexOf(obj);
+    if (idx !== -1) {
+      this.gameObjects.splice(idx, 1);
+      if (typeof obj.destroy === "function") {
+        obj.destroy();
+      }
+    }
+  }
+
   stepSimulation(delta) {
     this.physicsWorld.stepSimulation(delta, 10);
 
@@ -121,10 +136,20 @@ export class Engine {
 
   async start() {
     this._transformAux1 = new this.Ammo.btTransform();
+    for (const obj of this.gameObjects) {
+      if (typeof obj.start === "function") {
+        obj.start();
+      }
+    }
     const animate = () => {
       requestAnimationFrame(animate);
       const delta = this._clock.getDelta();
       this.stepSimulation(delta);
+      for (const obj of this.gameObjects) {
+        if (typeof obj.update === "function") {
+          obj.update(delta);
+        }
+      }
       this.renderer.render(this.scene, this.camera);
     };
     animate();
